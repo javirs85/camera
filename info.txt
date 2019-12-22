@@ -1,3 +1,100 @@
 user admin
 pass 
 blank
+
+/data/etc/python
+
+http://192.168.0.23/
+
+curl http://localhost:7999/1/config/set?emulate_motion=1
+curl http://localhost:7999/1/config/set?emulate_motion=0
+
+TakePic.py
+
+import commands
+
+status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=1")
+status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=0")
+
+/data/etc/python/PIRDetector.py
+
+PIRSensor.py
+
+import commands
+import RPi.GPIO as GPIO
+import time
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+
+PIR = 11
+RedLed = 7
+GreenLed = 12
+oldValue = 0
+
+GPIO.setup(PIR, GPIO.IN)         #Read output from PIR motion sensor
+GPIO.setup(RedLed, GPIO.OUT)         #LED output pin
+GPIO.setup(GreenLed, GPIO.OUT)         #LED ouput pin
+GPIO.output(RedLed,0)
+GPIO.output(GreenLed,0)
+
+
+GPIO.output(RedLed,1)
+time.sleep(0.2)
+GPIO.output(RedLed,0)
+time.sleep(0.2)
+GPIO.output(GreenLed,1)
+time.sleep(0.2)
+GPIO.output(GreenLed,0)
+time.sleep(0.2)
+GPIO.output(RedLed,1)
+time.sleep(0.2)
+GPIO.output(RedLed,0)
+time.sleep(0.2)
+GPIO.output(GreenLed,1)
+time.sleep(0.2)
+GPIO.output(GreenLed,0)
+time.sleep(0.2)
+GPIO.output(GreenLed,1)
+
+try:
+  while True:
+    i=GPIO.input(PIR)
+    if oldValue == i:
+      time.sleep(0.1)
+    else:
+      if i==0:
+        print "No intruders",i
+        time.sleep(0.1)
+      elif i==1:
+        print "Intruder detected",i
+        GPIO.output(RedLed,1)
+        GPIO.output(GreenLed,0)
+        status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=1")
+        status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=0")
+        time.sleep(3)
+        GPIO.output(RedLed,0)
+        GPIO.output(GreenLed,1)
+
+  print "Finished"
+
+except Exception, e:
+  print e
+
+except:
+  GPIO.cleanup()
+
+  
+  
+  
+  
+  
+ PushBullet.py
+ 
+token =  "o.VLqvOeGm81DKI5OT3LwrZpMh3menh8NA" 
+msg = "Movimiento detectado por sensor"
+URL =token + ': https://api.pushbullet.com/v2/pushes -d type=note -d title="Movimiento detectado" -d body="'+msg+'"'
+ 
+command = "curl --header 'Access-Token:"+token+"' https://api.pushbullet.com/v2/pushes -d type=note -d title='Movimiento detectado' -d body='"+msg+"'"
+status, output = commands.getstatusoutput(command)
+ 
+ status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=1")
