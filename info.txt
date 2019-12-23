@@ -121,6 +121,27 @@ status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/s
 
 
 
+ PushIP.py
+
+import commands
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+myIP = s.getsockname()[0]
+s.close()
+
+token =  "o.VLqvOeGm81DKI5OT3LwrZpMh3menh8NA" 
+msg = "Mi IP es "+myIP
+URL =token + ': https://api.pushbullet.com/v2/pushes -d type=note -d title="Sistema connectado" -d body="'+msg+'"'
+ 
+command = "curl --header 'Access-Token:"+token+"' https://api.pushbullet.com/v2/pushes -d type=note -d title='Movimiento detectado' -d body='"+msg+"'"
+status, output = commands.getstatusoutput(command)
+ 
+status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=1")
+
+
+
 
 To setup the pushbullet thingy: 
 
