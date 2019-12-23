@@ -2,6 +2,24 @@ user admin
 pass 
 blank
 
+
+wpa_supplicant location:
+/data/etc/wpa_supplicant.conf
+
+content must be: 
+
+update_config=1
+ctrl_interface=/var/run/wpa_supplicant
+
+network={
+    ssid="mynet"
+    psk="mynet1234"
+}
+
+
+
+
+
 /data/etc/python
 
 http://192.168.0.23/
@@ -26,9 +44,9 @@ import time
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
-PIR = 11
-RedLed = 7
-GreenLed = 12
+PIR = 12
+RedLed = 11
+GreenLed = 7
 oldValue = 0
 
 GPIO.setup(PIR, GPIO.IN)         #Read output from PIR motion sensor
@@ -89,7 +107,9 @@ except:
   
   
  PushBullet.py
- 
+
+import commands
+
 token =  "o.VLqvOeGm81DKI5OT3LwrZpMh3menh8NA" 
 msg = "Movimiento detectado por sensor"
 URL =token + ': https://api.pushbullet.com/v2/pushes -d type=note -d title="Movimiento detectado" -d body="'+msg+'"'
@@ -97,4 +117,27 @@ URL =token + ': https://api.pushbullet.com/v2/pushes -d type=note -d title="Movi
 command = "curl --header 'Access-Token:"+token+"' https://api.pushbullet.com/v2/pushes -d type=note -d title='Movimiento detectado' -d body='"+msg+"'"
 status, output = commands.getstatusoutput(command)
  
- status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=1")
+status, output = commands.getstatusoutput("curl http://localhost:7999/1/config/set?emulate_motion=1")
+
+
+
+
+To setup the pushbullet thingy: 
+
+LOGIN AS ADMING !!!
+go to motion notification
+turn on Run A Command
+Command : python /data/etc/python/PushBullet.py
+
+
+
+
+
+To start PIR sensor from the beginning:
+
+create this file:
+nano /data/etc/userinit.sh
+
+enter this line:
+python /data/etc/python/PIRSensor.py &
+
